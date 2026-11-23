@@ -1,366 +1,1163 @@
-<!DOCTYPE html><html lang=en class=no-js><meta charset=UTF-8><meta name=viewport content="width=device-width, initial-scale=1"><title>Infinite Scroll Gallery with Page Transitions using GSAP</title><link rel=stylesheet href=https://use.typekit.net/hrf4hvy.css><link rel=stylesheet href=Portfolio-Music-Part.b3e7a696.css><link rel=icon type=image/svg+xml href=https://tympanus.net/favicon/favicon.svg><link rel="icon shortcut" href=https://tympanus.net/favicon/favicon.ico><script>document.documentElement.className="js";</script><script src=//tympanus.net/codrops/adpacks/analytics.js></script><body class=loading>
-  <main>
-    <header class=frame>
-      <h1 class=frame__title>Infinite Scroll Gallery with Page Transitions using GSAP</h1>
-      <nav class=frame__links>
-        <a href="https://tympanus.net/codrops/?p=118084">Tutorial</a>
-        <a href=https://tympanus.net/codrops/hub/>All demos</a>
-        <a href=https://github.com/surya-aditya/codrops-infinite-scroll-and-content-transition>GitHub</a>
-      </nav>
-      <nav class=frame__tags>
-        <a href=https://tympanus.net/codrops/hub/tag/scroll/>#scroll</a>
-        <a href=https://tympanus.net/codrops/hub/tag/gsap/>#gsap</a>
-        <a href=https://tympanus.net/codrops/hub/tag/page-transition/>#page-transition</a>
-        <a href=https://tympanus.net/codrops/hub/tag/infinite/>#infinite</a>
-      </nav>
+<!DOCTYPE html>
+<html lang="fr" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DROPTHEMOVE MUSIC</title>
+    
+    <!-- 1. Favicons classiques (Navigateurs desktop & mobile) -->
+    <link rel="icon" type="image/x-icon" href="../favicon_io/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon_io/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="../favicon_io/favicon-48x48.png">
+
+    <!-- 2. Apple (iPhone, iPad - Ajout à l'écran d'accueil) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="../favicon_io/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="DROPTHEMOVE">
+
+    <!-- 3. Android & Chrome (Manifeste PWA & icônes haute résolution) -->
+    <link rel="manifest" href="../favicon_io/site.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="../favicon_io/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="../favicon_io/android-chrome-512x512.png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+
+    <!-- Google Fonts: Inter (standard épuré) & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pureBlack: '#000000',
+                        darkSurface: '#0A0A0A',
+                        alabaster: '#F4F1EA',
+                        ash: '#A6A29A',
+                        champagne: '#D4C5A9',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            color: #F4F1EA;
+            overflow-x: hidden;
+            font-weight: 300;
+        }
+
+        .snap-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            background-color: #000000;
+        }
+
+        .snap-section {
+            min-height: 100vh;
+            height: 100vh;
+            width: 100%;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            position: relative;
+            overflow: hidden;
+            background-color: #000000;
+        }
+
+        @media (max-height: 640px) {
+            .snap-section {
+                height: auto;
+                min-height: 100vh;
+                padding-top: 5.5rem;
+                padding-bottom: 3.5rem;
+            }
+        }
+
+        /* Onde sonore minimaliste en lecture */
+        @keyframes pulseLine {
+            0%, 100% { transform: scaleY(0.3); opacity: 0.4; }
+            50% { transform: scaleY(1); opacity: 1; }
+        }
+        .wave-bar {
+            transform-origin: bottom;
+            animation: pulseLine 1.2s ease-in-out infinite;
+        }
+        .wave-paused .wave-bar {
+            animation-play-state: paused;
+            transform: scaleY(0.25);
+            opacity: 0.3;
+            transition: all 0.4s ease;
+        }
+
+        /* Scrollbar discrète */
+        .snap-container::-webkit-scrollbar {
+            width: 3px;
+        }
+        .snap-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .snap-container::-webkit-scrollbar-thumb {
+            background: rgba(212, 197, 169, 0.3);
+        }
+        .fa-spotify {
+            color: #1DB954;
+        }
+        .fa-youtube {
+            color: #b91d1d;
+        }
+        .fa-instagram{
+            color: violet;       
+        }
+            
+    </style>
+</head>
+<body class="antialiased selection:bg-champagne selection:text-black">
+
+    <!-- =====================================================================
+         NAVIGATION SUPÉRIEURE MINIMALISTE
+         ===================================================================== -->
+    <header class="fixed top-0 left-0 right-0 z-50 px-6 py-6 md:px-14 flex items-center justify-between">
+        <a href="#hero" class="font-medium text-lg tracking-tight text-alabaster hover:text-champagne transition duration-500">
+            DROPTHEMOVE
+        </a>
+
+        <nav class="hidden md:flex items-center gap-10 text-[11px] uppercase tracking-[0.22em] text-ash">
+            <a href="#track-1" class="hover:text-alabaster transition duration-300">I</a>
+            <a href="#track-2" class="hover:text-alabaster transition duration-300">II</a>
+            <a href="#track-3" class="hover:text-alabaster transition duration-300">III</a>
+            <a href="#track-4" class="hover:text-alabaster transition duration-300">IV</a>
+            <a href="#track-5" class="hover:text-alabaster transition duration-300">V</a>
+            <a href="#track-6" class="hover:text-alabaster transition duration-300">VI</a>
+            <a href="#track-7" class="hover:text-alabaster transition duration-300">VII</a>
+
+            <a href="#manifeste" class="hover:text-alabaster transition duration-300">VISION</a>
+        </nav>
+
+        <div class="flex items-center gap-5">
+            <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer" 
+               class="text-xs tracking-[0.18em] uppercase text-ash hover:text-champagne transition duration-300 flex items-center gap-2">
+                <i class="fa-brands fa-spotify text-sm"></i>
+                <span class="hidden sm:inline">Spotify</span>
+            </a>
+        </div>
     </header>
-    <div class=gallery>
-      <figure class=gallery__slide style=--stagger:-24vw;--img-w:20vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=1.d908b0cb.webp alt="Some image">
-        </div>
-        <figcaption>Inherited Light</figcaption>
-      </figure>
 
-      <figure class=gallery__slide style=--stagger:14vw;--img-w:10vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=2.dae0813d.webp alt="Some image">
-        </div>
-        <figcaption>Red Earth Theory</figcaption>
-      </figure>
+    <!-- =====================================================================
+         INDICATEUR LATÉRAL EN TRAITS FINS
+         ===================================================================== -->
+    <aside aria-label="Navigation des chapitres" class="fixed right-5 md:right-10 top-1/2 -translate-y-1/2 z-50 flex flex-col items-end gap-4">
+        <a href="#hero" data-nav="hero" title="Introduction" class="nav-line h-[1px] w-6 bg-champagne transition-all duration-500"></a>
+        <a href="#track-1" data-nav="track-1" title="01 — Nuit d'Encre" class="nav-line h-[1px] w-3 bg-white/20 hover:bg-white/50 transition-all duration-500"></a>
+        <a href="#track-2" data-nav="track-2" title="02 — Marée Basse" class="nav-line h-[1px] w-3 bg-white/20 hover:bg-white/50 transition-all duration-500"></a>
+        <a href="#track-3" data-nav="track-3" title="03 — Sillage" class="nav-line h-[1px] w-3 bg-white/20 hover:bg-white/50 transition-all duration-500"></a>
+        <a href="#track-4" data-nav="track-4" title="04 — Horizon Pâle" class="nav-line h-[1px] w-3 bg-white/20 hover:bg-white/50 transition-all duration-500"></a>
+        <a href="#manifeste" data-nav="manifeste" title="Démarche" class="nav-line h-[1px] w-3 bg-white/20 hover:bg-white/50 transition-all duration-500"></a>
+    </aside>
 
-      <figure class=gallery__slide style=--stagger:-18vw;--img-w:23vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=3.86b28dcc.webp alt="Some image">
-        </div>
-        <figcaption>Soft Sovereignty</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:22vw;--img-w:18vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=4.4ad53b12.webp alt="Some image">
-        </div>
-        <figcaption>Gathering Weather</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:-26vw;--img-w:25vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=5.c7f56d0b.webp alt="Some image">
-        </div>
-        <figcaption>Worn Horizon</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:28vw;--img-w:28vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=6.c5b5749e.webp alt="Some image">
-        </div>
-        <figcaption>The Fifth Fire</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:-20vw;--img-w:16vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=7.abba1a19.webp alt="Some image">
-        </div>
-        <figcaption>Ancestor Season</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:8vw;--img-w:30vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=8.ae6ef929.webp alt="Some image">
-        </div>
-        <figcaption>A Field Listening</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:-12vw;--img-w:15vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=9.c2875ccb.webp alt="Some image">
-        </div>
-        <figcaption>Language of Dust</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:15vw;--img-w:23vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=10.f6baea4a.webp alt="Some image">
-        </div>
-        <figcaption>Between Sweetgrass</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:-24vw;--img-w:24vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=11.dab72d3f.webp alt="Some image">
-        </div>
-        <figcaption>Open Country</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:26vw;--img-w:16vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=12.49f42be3.webp alt="Some image">
-        </div>
-        <figcaption>The Living Ridge</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:-16vw;--img-w:34vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=13.635b904c.webp alt="Some image">
-        </div>
-        <figcaption>Future Ceremony</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:24vw;--img-w:13vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=14.72b668f7.webp alt="Some image">
-        </div>
-        <figcaption>Holding the West</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:-28vw;--img-w:19vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=15.4cb6ea0c.webp alt="Some image">
-        </div>
-        <figcaption>The Quiet Treaty</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:18vw;--img-w:22vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=16.83373624.webp alt="Some image">
-        </div>
-        <figcaption>Sky Without Borders</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:-10vw;--img-w:27vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=17.5193608f.webp alt="Some image">
-        </div>
-        <figcaption>Native Modern</figcaption>
-      </figure>
-      <figure class=gallery__slide style=--stagger:20vw;--img-w:18vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=18.96964090.webp alt="Some image">
-        </div>
-        <figcaption>Stone Kinship</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:-22vw;--img-w:19vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=19.7afab73c.webp alt="Some image">
-        </div>
-        <figcaption>Winter Holds</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:16vw;--img-w:30vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=20.26e662b3.webp alt="Some image">
-        </div>
-        <figcaption>The Seventh Path</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:-18vw;--img-w:17vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=21.afd12e66.webp alt="Some image">
-        </div>
-        <figcaption>Listening Ground</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:24vw;--img-w:12vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=22.784abd42.webp alt="Some image">
-        </div>
-        <figcaption>Made of Distance</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:-26vw;--img-w:23vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=23.27ff30c6.webp alt="Some image">
-        </div>
-        <figcaption>Names for Rain</figcaption>
-      </figure>
-
-      <figure class=gallery__slide style=--stagger:12vw;--img-w:26vw>
-        <div class=gallery__img-wrapper>
-          <img class=gallery__img src=24.049d050d.webp alt="Some image">
-        </div>
-        <figcaption>Returning North</figcaption>
-      </figure>
+    <!-- Notification discrète -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-lg bg-[#0A0A0A] border border-white/15 text-alabaster text-xs tracking-wide shadow-2xl opacity-0 pointer-events-none transition-all duration-500 flex items-center gap-3">
+        <span class="w-1.5 h-1.5 rounded-full bg-champagne"></span>
+        <span id="toast-msg">Information</span>
     </div>
-    <div class=content>
-      <div class=content-wrapper>
-        <figure class=content__preview-img>
-          <img alt>
-        </figure>
-        <div class=content__group-list>
-          <button class=content__back type=button>← Back</button>
-          <div class=content__group data-index=0>
-            <div class=content__title>Inherited Light</div>
-            <div class=content__description>
-              Before fences divided the prairie, horses transformed life across many Plains Nations, becoming companions in travel, hunting, and ceremony. The opening image returns to that enduring relationship between movement, land, and identity.
+
+    <!-- =====================================================================
+         CONTENEUR PLEIN ÉCRAN (FOND NOIR PUR #000000 UNIFORME)
+         ===================================================================== -->
+    <main id="snapContainer" class="snap-container">
+
+        <!-- =================================================================
+             SECTION 0 : HERO PAGE ÉDITORIALE
+             ================================================================= -->
+        <section id="hero" class="snap-section flex flex-col justify-center items-center px-6 md:px-16">
+
+            <div class="max-w-3xl w-full text-center z-10 space-y-8">
+                <p class="font-mono text-[11px] uppercase tracking-[0.3em] text-champagne">
+                    Selection • 2026
+                </p>
+
+                <h1 class="text-4xl sm:text-6xl md:text-7xl font-light tracking-tight text-alabaster leading-[1.08]">
+                    <span class="font-normal text-champagne">PUT ON SOME HEADPHONES
+                </h1>
+
+                <p class="max-w-xl mx-auto text-ash text-sm sm:text-base leading-relaxed font-light">
+                    A personal space where I share my music.
+                </p>
+
+                <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-5">
+                    <a href="#track-1" class="px-8 py-3.5 rounded-full border border-champagne/50 hover:border-champagne hover:bg-champagne hover:text-black text-alabaster text-xs uppercase tracking-[0.2em] transition duration-500">
+                        Step inside
+                    </a>
+                    <!-- <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer" class="px-6 py-3.5 text-xs uppercase tracking-[0.2em] text-ash hover:text-alabaster transition duration-300 flex items-center gap-2.5">
+                        <i class="fa-brands fa-spotify text-sm text-champagne" style="color:#1DB954"></i>
+                        Spotify profile
+                    </a> -->
+                </div>
             </div>
-          </div>
 
-          <div class=content__group data-index=1>
-            <div class=content__title>Red Earth Theory</div>
-            <div class=content__description>
-              Every stitch recalls a tradition older than the runway. Indigenous beadwork and embroidery have long carried family histories, regional identities, and stories passed from one generation to the next.
+            <!-- Repère de défilement minimaliste -->
+            <a href="#track-1" class="absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 text-ash/60 hover:text-champagne transition duration-500">
+                <span class="font-mono text-[10px] uppercase tracking-[0.3em]">SCROLL</span>
+                <span class="w-[1px] h-8 bg-champagne/40"></span>
+            </a>
+        </section>
+
+        <!-- =================================================================
+             SECTION 1 : PISTE 01 - 
+             ================================================================= -->
+        <section id="track-1" class="snap-section flex items-center justify-center px-6 md:px-16">
+            <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center z-10">
+                
+                <!-- Cover Art -->
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="relative group w-64 h-64 sm:w-80 sm:h-80 md:w-[360px] md:h-[360px]">
+                        <div class="relative w-full h-full rounded-xl overflow-hidden border border-white/[0.12] bg-darkSurface">
+                            <img src="./assets/img/Cover-Afrobeat-Find_You.png" 
+                                 onerror="this.src='https://placehold.co/800x800/0A0A0A/D4C5A9?text=01'"
+                                 alt="Pochette Nuit d'Encre" 
+                                 class="w-full h-full object-cover saturate-[0.65] contrast-[1.05] brightness-95 group-hover:scale-[1.03] transition duration-1000">
+                        </div>
+
+                        <div id="wave-0" class="wave-paused absolute bottom-4 left-4 flex items-end gap-1 h-4 bg-black/70 px-2 py-1 rounded">
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.1s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.35s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.2s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.45s"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Détails & Lecteur Local -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="flex items-center gap-4 font-mono text-[11px] tracking-[0.2em] text-ash uppercase">
+                        <span class="text-champagne">2026</span>
+                        <span>•</span>
+                        <span>Afrobeat</span>
+                        <span>•</span>
+                        <span>97 BPM — Ab Major</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h2 class="text-3xl sm:text-5xl font-light text-alabaster tracking-tight">
+                            FIND <span class="font-normal text-champagne">YOU</span>
+                        </h2>
+                        <!-- <p class="text-ash text-sm sm:text-base leading-relaxed font-light max-w-xl">
+                            Une rythmique lente et profonde portée par des percussions sourdes et une guitare étouffée. Composé tard le soir, ce morceau cherche l'équilibre entre tension intérieure et calme absolu.
+                        </p> -->
+                    </div>
+
+                    <!-- Lecteur Audio Minimaliste (./beat-01.mp3) -->
+                    <div class="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-4">
+                        <div class="flex items-center justify-between font-mono text-[11px] text-ash">
+                               <!-- <span>Source : <span class="text-alabaster/90">./Find you.mp3</span></span> -->                              
+                               <span id="time-0">00:00 / 02:45</span>
+                        </div>
+
+                        <div class="flex items-center gap-5">
+                            <button onclick="togglePlay(0)" id="play-btn-0" aria-label="Lire Nuit d'Encre"
+                                    class="w-11 h-11 rounded-full border border-champagne/60 hover:bg-champagne hover:text-black text-champagne flex items-center justify-center transition duration-300 shrink-0">
+                                <i class="fa-solid fa-play text-xs ml-0.5"></i>
+                            </button>
+
+                            <div class="flex-1 space-y-2">
+                                <div onclick="seekTrack(event, 0)" class="w-full h-[2px] bg-white/10 cursor-pointer relative py-2 -my-2 group">
+                                    <div class="w-full h-[2px] bg-white/10 overflow-hidden">
+                                        <div id="progress-0" class="h-full w-0 bg-champagne transition-all duration-100"></div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between font-mono text-[10px] text-ash/70">
+                                    <span>dropthemove</span>
+                                    <span id="status-0">En attente</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <audio id="audio-0" preload="metadata" src="./assets/audio/Afrobeat_Find you_97BPM_Abmaj.wav"></audio>
+                    </div>
+
+                    <!-- Liens épurés -->
+                    <div class="flex flex-wrap items-center gap-6 pt-1 text-xs uppercase tracking-[0.18em]">
+                        <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer"
+                           class="px-5 py-3 rounded-full bg-alabaster text-black hover:bg-champagne font-medium transition duration-300 flex items-center gap-2.5">
+                            <i class="fa-brands fa-spotify text-sm"></i>
+                            Écouter sur Spotify
+                        </a>
+
+                        <!-- <a href="./beat-01.mp3" download="dropthemove-01-Nuit-d-Encre.mp3"
+                           onclick="notifyLocalFile(event, './beat-01.mp3')"
+                           class="text-ash hover:text-alabaster transition duration-300 flex items-center gap-2 py-2 border-b border-transparent hover:border-champagne/50">
+                            <i class="fa-solid fa-arrow-down text-[10px] text-champagne"></i>
+                            Fichier local (.mp3)
+                        </a> -->
+                    </div>
+                </div>
             </div>
-          </div>
+        </section>
 
-          <div class=content__group data-index=2>
-            <div class=content__title>Soft Sovereignty</div>
-            <div class=content__description>
-              Contemporary Indigenous fashion refuses to separate heritage from innovation. Here, bold modern forms coexist with an older understanding: sovereignty begins with the freedom to define one's own image.
+        <!-- =================================================================
+             SECTION 2 : PISTE 02 — MARÉE BASSE
+             ================================================================= -->
+        <section id="track-2" class="snap-section flex items-center justify-center px-6 md:px-16">
+            <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center z-10">
+                
+                <!-- Cover Art -->
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="relative group w-64 h-64 sm:w-80 sm:h-80 md:w-[360px] md:h-[360px]">
+                        <div class="relative w-full h-full rounded-xl overflow-hidden border border-white/[0.12] bg-darkSurface">
+                            <img src="./assets/img/Cover-Afrobeat-Fire.png" 
+                                 onerror="this.src='https://placehold.co/800x800/0A0A0A/D4C5A9?text=02'"
+                                 alt="Pochette Marée Basse" 
+                                 class="w-full h-full object-cover saturate-[0.65] contrast-[1.05] brightness-95 group-hover:scale-[1.03] transition duration-1000">
+                        </div>
+
+                        <div id="wave-1" class="wave-paused absolute bottom-4 left-4 flex items-end gap-1 h-4 bg-black/70 px-2 py-1 rounded">
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.2s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.4s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.1s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.3s"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Détails & Lecteur Local -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="flex items-center gap-4 font-mono text-[11px] tracking-[0.2em] text-ash uppercase">
+                        <span class="text-champagne">2026</span>
+                        <span>•</span>
+                        <span>Afrobeat</span>
+                        <span>•</span>
+                        <span>113 BPM — F Mineur</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h2 class="text-3xl sm:text-5xl font-light text-alabaster tracking-tight">
+                            FIRE
+                        </h2>
+                        <!-- <p class="text-ash text-sm sm:text-base leading-relaxed font-light max-w-xl">
+                            Un balancement chaloupé inspiré par les rythmes afro-caribéens et la douceur d'un piano électrique feutré. Une pièce pensée pour la lenteur et l'ondulation.
+                        </p> -->
+                    </div>
+
+                    <!-- Lecteur Audio Minimaliste (./beat-02.mp3) -->
+                    <div class="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-4">
+                        <div class="flex items-center justify-between font-mono text-[11px] text-ash">
+                            <!-- <span>Source : <span class="text-alabaster/90">./beat-02.mp3</span></span> -->
+                            <span id="time-1">00:00 / 03:12</span> 
+                        </div>
+
+                        <div class="flex items-center gap-5">
+                            <button onclick="togglePlay(1)" id="play-btn-1" aria-label="Lire Marée Basse"
+                                    class="w-11 h-11 rounded-full border border-champagne/60 hover:bg-champagne hover:text-black text-champagne flex items-center justify-center transition duration-300 shrink-0">
+                                <i class="fa-solid fa-play text-xs ml-0.5"></i>
+                            </button>
+
+                            <div class="flex-1 space-y-2">
+                                <div onclick="seekTrack(event, 1)" class="w-full h-[2px] bg-white/10 cursor-pointer relative py-2 -my-2">
+                                    <div class="w-full h-[2px] bg-white/10 overflow-hidden">
+                                        <div id="progress-1" class="h-full w-0 bg-champagne transition-all duration-100"></div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between font-mono text-[10px] text-ash/70">
+                                    <span>dropthemove</span>
+                                    <span id="status-1">En attente</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <audio id="audio-1" preload="metadata" src="./assets/audio/Afrobeat_Fire_113BPM_Fmin.wav"></audio>
+                    </div>
+
+                    <!-- Liens épurés -->
+                    <div class="flex flex-wrap items-center gap-6 pt-1 text-xs uppercase tracking-[0.18em]">
+                        <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer"
+                           class="px-5 py-3 rounded-full bg-alabaster text-black hover:bg-champagne font-medium transition duration-300 flex items-center gap-2.5">
+                            <i class="fa-brands fa-spotify text-sm"></i>
+                            Écouter sur Spotify
+                        </a>
+
+                        <!-- <a href="./beat-02.mp3" download="dropthemove-02-Maree-Basse.mp3"
+                           onclick="notifyLocalFile(event, './beat-02.mp3')"
+                           class="text-ash hover:text-alabaster transition duration-300 flex items-center gap-2 py-2 border-b border-transparent hover:border-champagne/50">
+                            <i class="fa-solid fa-arrow-down text-[10px] text-champagne"></i>
+                            Fichier local (.mp3)
+                        </a> -->
+                    </div>
+                </div>
             </div>
-          </div>
+        </section>
 
-          <div class=content__group data-index=3>
-            <div class=content__title>Gathering Weather</div>
-            <div class=content__description>
-              Garments shaped by movement echo a life lived close to changing skies. Across generations, clothing has adapted to the landscape rather than asking the landscape to adapt in return.
+        <!-- =================================================================
+             SECTION 3 : PISTE 03 — SILLAGE
+             ================================================================= -->
+        <section id="track-3" class="snap-section flex items-center justify-center px-6 md:px-16">
+            <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center z-10">
+                
+                <!-- Cover Art -->
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="relative group w-64 h-64 sm:w-80 sm:h-80 md:w-[360px] md:h-[360px]">
+                        <div class="relative w-full h-full rounded-xl overflow-hidden border border-white/[0.12] bg-darkSurface">
+                            <img src="./assets/img/Cover-Afrobeat-Never_You.png" 
+                                 onerror="this.src='https://placehold.co/800x800/0A0A0A/D4C5A9?text=03'"
+                                 alt="Pochette Sillage" 
+                                 class="w-full h-full object-cover saturate-[0.65] contrast-[1.05] brightness-95 group-hover:scale-[1.03] transition duration-1000">
+                        </div>
+
+                        <div id="wave-2" class="wave-paused absolute bottom-4 left-4 flex items-end gap-1 h-4 bg-black/70 px-2 py-1 rounded">
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.15s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.3s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.45s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.1s"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Détails & Lecteur Local -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="flex items-center gap-4 font-mono text-[11px] tracking-[0.2em] text-ash uppercase">
+                        <span class="text-champagne">2026</span>
+                        <span>•</span>
+                        <span>Afrobeat</span>
+                        <span>•</span>
+                        <span>83 BPM — B Major</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h2 class="text-3xl sm:text-5xl font-light text-alabaster tracking-tight">
+                            NEVER <span class="font-normal text-champagne">YOU</span>
+                        </h2>
+                        <!-- <p class="text-ash text-sm sm:text-base leading-relaxed font-light max-w-xl">
+                            Des nappes analogiques aériennes traversées par une basse ronde et minimale. Une exploration autour de l'espace sonore, laissant respirer chaque note avant la suivante.
+                        </p> -->
+                    </div>
+
+                    <!-- Lecteur Audio Minimaliste (./beat-03.mp3) -->
+                    <div class="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-4">
+                        <div class="flex items-center justify-between font-mono text-[11px] text-ash">
+                        <!--  <span>Source : <span class="text-alabaster/90">./beat-03.mp3</span></span> -->  
+                          <span id="time-2">00:00 / 02:58</span>
+                        </div>
+
+                        <div class="flex items-center gap-5">
+                            <button onclick="togglePlay(2)" id="play-btn-2" aria-label="Lire Sillage Intérieur"
+                                    class="w-11 h-11 rounded-full border border-champagne/60 hover:bg-champagne hover:text-black text-champagne flex items-center justify-center transition duration-300 shrink-0">
+                                <i class="fa-solid fa-play text-xs ml-0.5"></i>
+                            </button>
+
+                            <div class="flex-1 space-y-2">
+                                <div onclick="seekTrack(event, 2)" class="w-full h-[2px] bg-white/10 cursor-pointer relative py-2 -my-2">
+                                    <div class="w-full h-[2px] bg-white/10 overflow-hidden">
+                                        <div id="progress-2" class="h-full w-0 bg-champagne transition-all duration-100"></div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between font-mono text-[10px] text-ash/70">
+                                    <span>dropthemove</span>
+                                    <span id="status-2">En attente</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <audio id="audio-2" preload="metadata" src="./assets/audio/Afrobeat_Never you_83BPM_Bmajor.wav"></audio>
+                    </div>
+
+                    <!-- Liens épurés -->
+                    <div class="flex flex-wrap items-center gap-6 pt-1 text-xs uppercase tracking-[0.18em]">
+                        <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer"
+                           class="px-5 py-3 rounded-full bg-alabaster text-black hover:bg-champagne font-medium transition duration-300 flex items-center gap-2.5">
+                            <i class="fa-brands fa-spotify text-sm"></i>
+                            Écouter sur Spotify
+                        </a>
+
+                        <!-- <a href="./beat-03.mp3" download="dropthemove-03-Sillage-Interieur.mp3"
+                           onclick="notifyLocalFile(event, './beat-03.mp3')"
+                           class="text-ash hover:text-alabaster transition duration-300 flex items-center gap-2 py-2 border-b border-transparent hover:border-champagne/50">
+                            <i class="fa-solid fa-arrow-down text-[10px] text-champagne"></i>
+                            Fichier local (.mp3)
+                        </a> -->
+                    </div>
+                </div>
             </div>
-          </div>
+        </section>
 
-          <div class=content__group data-index=4>
-            <div class=content__title>Worn Horizon</div>
-            <div class=content__description>
-              Wildflowers bloom across lands that remember both abundance and loss. Beauty persists quietly, much like the cultures that continue to flourish despite centuries of attempted erasure.
+        <!-- =================================================================
+             SECTION 4 : PISTE 04 — HORIZON PÂLE
+             ================================================================= -->
+        <section id="track-4" class="snap-section flex items-center justify-center px-6 md:px-16">
+            <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center z-10">
+                
+                <!-- Cover Art -->
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="relative group w-64 h-64 sm:w-80 sm:h-80 md:w-[360px] md:h-[360px]">
+                        <div class="relative w-full h-full rounded-xl overflow-hidden border border-white/[0.12] bg-darkSurface">
+                            <img src="./assets/img/Cover-Rnb-Break_Dream.png" 
+                                 onerror="this.src='https://placehold.co/800x800/0A0A0A/D4C5A9?text=04'"
+                                 alt="Pochette Horizon Pâle" 
+                                 class="w-full h-full object-cover saturate-[0.65] contrast-[1.05] brightness-95 group-hover:scale-[1.03] transition duration-1000">
+                        </div>
+
+                        <div id="wave-3" class="wave-paused absolute bottom-4 left-4 flex items-end gap-1 h-4 bg-black/70 px-2 py-1 rounded">
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.25s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.1s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.35s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.2s"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Détails & Lecteur Local -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="flex items-center gap-4 font-mono text-[11px] tracking-[0.2em] text-ash uppercase">
+                        <span class="text-champagne">2026</span>
+                        <span>•</span>
+                        <span>RnB &amp; HipHop</span>
+                        <span>•</span>
+                        <span>140 BPM — F# Minor</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h2 class="text-3xl sm:text-5xl font-light text-alabaster tracking-tight">
+                            BREAK <span class="font-normal text-champagne">DREAM</span>
+                        </h2>
+                        <!-- <p class="text-ash text-sm sm:text-base leading-relaxed font-light max-w-xl">
+                            Un motif de synthétiseur délicat accompagné d'une cadence sobre. L'idée d'une aube silencieuse après une longue nuit passée à sculpter le son.
+                        </p> -->
+                    </div>
+
+                    <!-- Lecteur Audio Minimaliste (./beat-04.mp3) -->
+                    <div class="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-4">
+                        <div class="flex items-center justify-between font-mono text-[11px] text-ash">
+                        <!-- <span>Source : <span class="text-alabaster/90">./beat-04.mp3</span></span> -->                            
+                         <span id="time-3">00:00 / 03:05</span>
+                        </div>
+
+                        <div class="flex items-center gap-5">
+                            <button onclick="togglePlay(3)" id="play-btn-3" aria-label="Lire Horizon Pâle"
+                                    class="w-11 h-11 rounded-full border border-champagne/60 hover:bg-champagne hover:text-black text-champagne flex items-center justify-center transition duration-300 shrink-0">
+                                <i class="fa-solid fa-play text-xs ml-0.5"></i>
+                            </button>
+
+                            <div class="flex-1 space-y-2">
+                                <div onclick="seekTrack(event, 3)" class="w-full h-[2px] bg-white/10 cursor-pointer relative py-2 -my-2">
+                                    <div class="w-full h-[2px] bg-white/10 overflow-hidden">
+                                        <div id="progress-3" class="h-full w-0 bg-champagne transition-all duration-100"></div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between font-mono text-[10px] text-ash/70">
+                                    <span>dropthemove</span>
+                                    <span id="status-3">En attente</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <audio id="audio-3" preload="metadata" src="./assets/audio/RnB_Break_Dream_140BPM_F_sharp_minor.wav"></audio>
+                    </div>
+
+                    <!-- Liens épurés -->
+                    <div class="flex flex-wrap items-center gap-6 pt-1 text-xs uppercase tracking-[0.18em]">
+                        <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer"
+                           class="px-5 py-3 rounded-full bg-alabaster text-black hover:bg-champagne font-medium transition duration-300 flex items-center gap-2.5">
+                            <i class="fa-brands fa-spotify text-sm"></i>
+                            Écouter sur Spotify
+                        </a>
+
+                        <!-- <a href="./beat-04.mp3" download="dropthemove-04-Horizon-Pale.mp3"
+                           onclick="notifyLocalFile(event, './beat-04.mp3')"
+                           class="text-ash hover:text-alabaster transition duration-300 flex items-center gap-2 py-2 border-b border-transparent hover:border-champagne/50">
+                            <i class="fa-solid fa-arrow-down text-[10px] text-champagne"></i>
+                            Fichier local (.mp3)
+                        </a> -->
+                    </div>
+                </div>
             </div>
-          </div>
+        </section>
 
-          <div class=content__group data-index=5>
-            <div class=content__title>The Fifth Fire</div>
-            <div class=content__description>
-              Many Indigenous teachings describe every generation as a keeper of what comes next. Even the simplest object becomes a reminder that renewal begins with care rather than spectacle.
+        <!-- =================================================================
+             SECTION 5 : PISTE 05 — HORIZON PÂLE
+             ================================================================= -->
+        <section id="track-5" class="snap-section flex items-center justify-center px-6 md:px-16">
+            <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center z-10">
+                
+                <!-- Cover Art -->
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="relative group w-64 h-64 sm:w-80 sm:h-80 md:w-[360px] md:h-[360px]">
+                        <div class="relative w-full h-full rounded-xl overflow-hidden border border-white/[0.12] bg-darkSurface">
+                            <img src="./assets/img/Cover-RnB-Introspection.png" 
+                                 onerror="this.src='https://placehold.co/800x800/0A0A0A/D4C5A9?text=04'"
+                                 alt="Pochette Horizon Pâle" 
+                                 class="w-full h-full object-cover saturate-[0.65] contrast-[1.05] brightness-95 group-hover:scale-[1.03] transition duration-1000">
+                        </div>
+
+                        <div id="wave-4" class="wave-paused absolute bottom-4 left-4 flex items-end gap-1 h-4 bg-black/70 px-2 py-1 rounded">
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.25s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.1s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.35s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.2s"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Détails & Lecteur Local -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="flex items-center gap-4 font-mono text-[11px] tracking-[0.2em] text-ash uppercase">
+                        <span class="text-champagne">2026</span>
+                        <span>•</span>
+                        <span>INTROSPECTION</span>
+                        <span>•</span>
+                        <span>95 BPM — A Major</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h2 class="text-3xl sm:text-5xl font-light text-alabaster tracking-tight">
+                            INTROS<span class="font-normal text-champagne">PECTION</span>
+                        </h2>
+                        <!-- <p class="text-ash text-sm sm:text-base leading-relaxed font-light max-w-xl">
+                            Un motif de synthétiseur délicat accompagné d'une cadence sobre. L'idée d'une aube silencieuse après une longue nuit passée à sculpter le son.
+                        </p> -->
+                    </div>
+
+                    <!-- Lecteur Audio Minimaliste (./beat-04.mp3) -->
+                    <div class="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-4">
+                        <div class="flex items-center justify-between font-mono text-[11px] text-ash">
+                            <!--  <span>Source : <span class="text-alabaster/90">./beat-04.mp3</span></span> -->                            
+                              <span id="time-4">00:00 / 03:05</span>
+                        </div>
+
+                        <div class="flex items-center gap-5">
+                            <button onclick="togglePlay(4)" id="play-btn-4" aria-label="Lire Horizon Pâle"
+                                    class="w-11 h-11 rounded-full border border-champagne/60 hover:bg-champagne hover:text-black text-champagne flex items-center justify-center transition duration-300 shrink-0">
+                                <i class="fa-solid fa-play text-xs ml-0.5"></i>
+                            </button>
+
+                            <div class="flex-1 space-y-2">
+                                <div onclick="seekTrack(event, 4)" class="w-full h-[2px] bg-white/10 cursor-pointer relative py-2 -my-2">
+                                    <div class="w-full h-[2px] bg-white/10 overflow-hidden">
+                                        <div id="progress-4" class="h-full w-0 bg-champagne transition-all duration-100"></div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between font-mono text-[10px] text-ash/70">
+                                    <span>dropthemove</span>
+                                    <span id="status-4">En attente</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <audio id="audio-4" preload="metadata" src="./assets/audio/RnB_Introspection_95BPM_Amajor.wav"></audio>
+                    </div>
+
+                    <!-- Liens épurés -->
+                    <div class="flex flex-wrap items-center gap-6 pt-1 text-xs uppercase tracking-[0.18em]">
+                        <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer"
+                           class="px-5 py-3 rounded-full bg-alabaster text-black hover:bg-champagne font-medium transition duration-300 flex items-center gap-2.5">
+                            <i class="fa-brands fa-spotify text-sm"></i>
+                            Écouter sur Spotify
+                        </a>
+
+                        <!-- <a href="./beat-04.mp3" download="dropthemove-04-Horizon-Pale.mp3"
+                           onclick="notifyLocalFile(event, './beat-04.mp3')"
+                           class="text-ash hover:text-alabaster transition duration-300 flex items-center gap-2 py-2 border-b border-transparent hover:border-champagne/50">
+                            <i class="fa-solid fa-arrow-down text-[10px] text-champagne"></i>
+                            Fichier local (.mp3)
+                        </a> -->
+                    </div>
+                </div>
             </div>
-          </div>
+        </section>
 
-          <div class=content__group data-index=6>
-            <div class=content__title>Ancestor Season</div>
-            <div class=content__description>
-              Community has always embraced many voices rather than one. Individual expression sits comfortably beside collective identity, each strengthening the other instead of competing with it.
+        <!-- =================================================================
+             SECTION 6 : PISTE 06 — HORIZON PÂLE
+             ================================================================= -->
+        <section id="track-6" class="snap-section flex items-center justify-center px-6 md:px-16">
+            <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center z-10">
+                
+                <!-- Cover Art -->
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="relative group w-64 h-64 sm:w-80 sm:h-80 md:w-[360px] md:h-[360px]">
+                        <div class="relative w-full h-full rounded-xl overflow-hidden border border-white/[0.12] bg-darkSurface">
+                            <img src="./assets/img/Cover-RnB-Night_Walk.png" 
+                                 onerror="this.src='https://placehold.co/800x800/0A0A0A/D4C5A9?text=04'"
+                                 alt="Pochette Horizon Pâle" 
+                                 class="w-full h-full object-cover saturate-[0.65] contrast-[1.05] brightness-95 group-hover:scale-[1.03] transition duration-1000">
+                        </div>
+
+                        <div id="wave-5" class="wave-paused absolute bottom-4 left-4 flex items-end gap-1 h-4 bg-black/70 px-2 py-1 rounded">
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.25s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.1s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.35s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.2s"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Détails & Lecteur Local -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="flex items-center gap-4 font-mono text-[11px] tracking-[0.2em] text-ash uppercase">
+                        <span class="text-champagne">2026</span>
+                        <span>•</span>
+                        <span>NIGHT &amp; WALK</span>
+                        <span>•</span>
+                        <span>143 BPM — B Minor</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h2 class="text-3xl sm:text-5xl font-light text-alabaster tracking-tight">
+                            NIGHT <span class="font-normal text-champagne">WALK</span>
+                        </h2>
+                        <!-- <p class="text-ash text-sm sm:text-base leading-relaxed font-light max-w-xl">
+                            Un motif de synthétiseur délicat accompagné d'une cadence sobre. L'idée d'une aube silencieuse après une longue nuit passée à sculpter le son.
+                        </p> -->
+                    </div>
+
+                    <!-- Lecteur Audio Minimaliste (./beat-04.mp3) -->
+                    <div class="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-4">
+                        <div class="flex items-center justify-between font-mono text-[11px] text-ash">
+                            <!--  <span>Source : <span class="text-alabaster/90">./beat-04.mp3</span></span>  -->                            
+                              <span id="time-5">00:00 / 03:05</span>
+                        </div>
+
+                        <div class="flex items-center gap-5">
+                            <button onclick="togglePlay(5)" id="play-btn-5" aria-label="Lire Horizon Pâle"
+                                    class="w-11 h-11 rounded-full border border-champagne/60 hover:bg-champagne hover:text-black text-champagne flex items-center justify-center transition duration-300 shrink-0">
+                                <i class="fa-solid fa-play text-xs ml-0.5"></i>
+                            </button>
+
+                            <div class="flex-1 space-y-2">
+                                <div onclick="seekTrack(event, 5)" class="w-full h-[2px] bg-white/10 cursor-pointer relative py-2 -my-2">
+                                    <div class="w-full h-[2px] bg-white/10 overflow-hidden">
+                                        <div id="progress-5" class="h-full w-0 bg-champagne transition-all duration-100"></div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between font-mono text-[10px] text-ash/70">
+                                    <span>dropthemove</span>
+                                    <span id="status-5">En attente</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <audio id="audio-5" preload="metadata" src="./assets/audio/RnB_Night Walk_143BPM_Bminor.wav"></audio>
+                    </div>
+
+                    <!-- Liens épurés -->
+                    <div class="flex flex-wrap items-center gap-6 pt-1 text-xs uppercase tracking-[0.18em]">
+                        <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer"
+                           class="px-5 py-3 rounded-full bg-alabaster text-black hover:bg-champagne font-medium transition duration-300 flex items-center gap-2.5">
+                            <i class="fa-brands fa-spotify text-sm"></i>
+                            Écouter sur Spotify
+                        </a>
+
+                        <!-- <a href="./beat-04.mp3" download="dropthemove-04-Horizon-Pale.mp3"
+                           onclick="notifyLocalFile(event, './beat-04.mp3')"
+                           class="text-ash hover:text-alabaster transition duration-300 flex items-center gap-2 py-2 border-b border-transparent hover:border-champagne/50">
+                            <i class="fa-solid fa-arrow-down text-[10px] text-champagne"></i>
+                            Fichier local (.mp3)
+                        </a> -->
+                    </div>
+                </div>
             </div>
-          </div>
+        </section>
 
-          <div class=content__group data-index=7>
-            <div class=content__title>A Field Listening</div>
-            <div class=content__description>
-              Red recalls ochre, earth, trade cloth, and ceremony without belonging to any single tradition. Colour becomes memory carried across generations instead of preserved behind glass.
+        <!-- =================================================================
+             SECTION 7 : PISTE 07 — HORIZON PÂLE
+             ================================================================= -->
+        <section id="track-7" class="snap-section flex items-center justify-center px-6 md:px-16">
+            <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center z-10">
+                
+                <!-- Cover Art -->
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="relative group w-64 h-64 sm:w-80 sm:h-80 md:w-[360px] md:h-[360px]">
+                        <div class="relative w-full h-full rounded-xl overflow-hidden border border-white/[0.12] bg-darkSurface">
+                            <img src="./assets/img/Cover-RnB-Too-Loud.png" 
+                                 onerror="this.src='https://placehold.co/800x800/0A0A0A/D4C5A9?text=04'"
+                                 alt="Pochette Horizon Pâle" 
+                                 class="w-full h-full object-cover saturate-[0.65] contrast-[1.05] brightness-95 group-hover:scale-[1.03] transition duration-1000">
+                        </div>
+
+                        <div id="wave-6" class="wave-paused absolute bottom-4 left-4 flex items-end gap-1 h-4 bg-black/70 px-2 py-1 rounded">
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.25s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.1s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.35s"></span>
+                            <span class="wave-bar w-[2px] h-full bg-champagne" style="animation-delay: 0.2s"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Détails & Lecteur Local -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="flex items-center gap-4 font-mono text-[11px] tracking-[0.2em] text-ash uppercase">
+                        <span class="text-champagne">2026</span>
+                        <span>•</span>
+                        <span>RnB &amp; HipHop</span>
+                        <span>•</span>
+                        <span>100 BPM — D Major</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h2 class="text-3xl sm:text-5xl font-light text-alabaster tracking-tight">
+                            TOO <span class="font-normal text-champagne">LOUD</span>
+                        </h2>
+                        <!-- <p class="text-ash text-sm sm:text-base leading-relaxed font-light max-w-xl">
+                            Un motif de synthétiseur délicat accompagné d'une cadence sobre. L'idée d'une aube silencieuse après une longue nuit passée à sculpter le son.
+                        </p> -->
+                    </div>
+
+                    <!-- Lecteur Audio Minimaliste (./beat-04.mp3) -->
+                    <div class="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-4">
+                        <div class="flex items-center justify-between font-mono text-[11px] text-ash">
+                            <!-- <span>Source : <span class="text-alabaster/90">./beat-04.mp3</span></span> -->                            
+                             <span id="time-6">00:00 / 03:05</span>
+                        </div>
+
+                        <div class="flex items-center gap-5">
+                            <button onclick="togglePlay(6)" id="play-btn-6" aria-label="Lire Horizon Pâle"
+                                    class="w-11 h-11 rounded-full border border-champagne/60 hover:bg-champagne hover:text-black text-champagne flex items-center justify-center transition duration-300 shrink-0">
+                                <i class="fa-solid fa-play text-xs ml-0.5"></i>
+                            </button>
+
+                            <div class="flex-1 space-y-2">
+                                <div onclick="seekTrack(event, 6)" class="w-full h-[2px] bg-white/10 cursor-pointer relative py-2 -my-2">
+                                    <div class="w-full h-[2px] bg-white/10 overflow-hidden">
+                                        <div id="progress-6" class="h-full w-0 bg-champagne transition-all duration-100"></div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between font-mono text-[10px] text-ash/70">
+                                    <span>dropthemove</span>
+                                    <span id="status-6">En attente</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <audio id="audio-6" preload="metadata" src="./assets/audio/Rnb_Too Loud_100BPM_Dmajor.wav"></audio>
+                    </div>
+
+                    <!-- Liens épurés -->
+                    <div class="flex flex-wrap items-center gap-6 pt-1 text-xs uppercase tracking-[0.18em]">
+                        <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer"
+                           class="px-5 py-3 rounded-full bg-alabaster text-black hover:bg-champagne font-medium transition duration-300 flex items-center gap-2.5">
+                            <i class="fa-brands fa-spotify text-sm"></i>
+                            Écouter sur Spotify
+                        </a>
+
+                        <!-- <a href="./beat-04.mp3" download="dropthemove-04-Horizon-Pale.mp3"
+                           onclick="notifyLocalFile(event, './beat-04.mp3')"
+                           class="text-ash hover:text-alabaster transition duration-300 flex items-center gap-2 py-2 border-b border-transparent hover:border-champagne/50">
+                            <i class="fa-solid fa-arrow-down text-[10px] text-champagne"></i>
+                            Fichier local (.mp3)
+                        </a> -->
+                    </div>
+                </div>
             </div>
-          </div>
+        </section>
 
-          <div class=content__group data-index=8>
-            <div class=content__title>Language of Dust</div>
-            <div class=content__description>
-              More than a hundred Indigenous languages are spoken across North America today. Each surviving language offers another way of understanding landscape, kinship, and the passing of seasons.
+        <!-- =================================================================
+             SECTION 5 : DÉMARCHE ARTISTIQUE
+             ================================================================= -->
+        <section id="manifeste" class="snap-section flex flex-col justify-center items-center px-6 md:px-16">
+            <div class="max-w-3xl w-full z-10 space-y-12 text-center">
+                <div class="space-y-5">
+                    <p class="font-mono text-[11px] uppercase tracking-[0.3em] text-champagne">
+                        Vision
+                    </p>
+                    <h2 class="text-3xl sm:text-5xl font-light text-alabaster leading-tight tracking-tight">
+                        Between silence <span class="font-normal text-champagne">and rhythm.</span>
+                    </h2>
+                    <p class="text-ash text-sm sm:text-base leading-relaxed font-light max-w-2xl mx-auto">
+                        Moving track by track, guided by instinct and deep moods. 
+                    </p>
+                    <p class="text-ash text-sm sm:text-base leading-relaxed font-light max-w-2xl mx-auto">
+                        Here, I simply gather my experiments: raw textures and calm melodies.                    
+                    </p>
+                </div>
+
+                <!-- Liens d'écoute et réseaux artistiques -->
+                <div class="space-y-4 pt-4">
+                    <p class="font-mono text-[11px] uppercase tracking-[0.25em] text-ash">
+                        Follow along
+                    </p>
+                    <div class="flex flex-wrap items-center justify-center gap-8 pt-2 text-xs uppercase tracking-[0.2em]">
+                        <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer" class="text-alabaster hover:text-champagne transition duration-300 flex items-center gap-2">
+                            <i class="fa-brands fa-spotify text-sm"></i>
+                            Spotify
+                        </a>
+                        <!-- 
+                        < a href="https://soundcloud.com" target="_blank" rel="noopener noreferrer" class="text-alabaster hover:text-champagne transition duration-300 flex items-center gap-2">
+                            <i class="fa-brands fa-soundcloud text-sm"></i>
+                            SoundCloud
+                        </a> 
+                        -->
+                        <!-- 
+                        <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="text-alabaster hover:text-champagne transition duration-300 flex items-center gap-2">
+                            <i class="fa-brands fa-youtube text-sm"></i>
+                            YouTube
+                        </a> 
+                        -->
+                        <a href="https://www.instagram.com/dropthemove/" target="_blank" rel="noopener noreferrer" class="text-alabaster hover:text-champagne transition duration-300 flex items-center gap-2">
+                            <i class="fa-brands fa-instagram text-sm"></i>
+                            Instagram
+                        </a>
+                    </div>
+                </div>
+
+                <footer class="pt-10 font-mono text-[10px] uppercase tracking-[0.25em] text-ash/50">
+                    <p>dropthemove — Music • 2026</p>
+                    <p class="pt-10">CONTACTS</p>
+                    <p class="pt-2 lowercase" style="color: white;">biabiany.dam@gmail.com</p>
+                    <p class="pt-2 lowercase" style="color: white;">dbbny.digital@gmail.com</p>
+                </footer>
             </div>
-          </div>
+        </section>
 
-          <div class=content__group data-index=9>
-            <div class=content__title>Between Sweetgrass</div>
-            <div class=content__description>
-              Sweetgrass has long been gathered across many Nations as a symbol of kindness, gratitude, and connection. Its gentle presence reminds us that strength often arrives without raising its voice.
-            </div>
-          </div>
+    </main>
 
-          <div class=content__group data-index=10>
-            <div class=content__title>Open Country</div>
-            <div class=content__description>
-              Contemporary Indigenous artists increasingly reclaim portraiture on their own terms. The gaze no longer documents a disappearing people; it reflects a living culture shaping its own future.
-            </div>
-          </div>
+    <!-- =====================================================================
+         JAVASCRIPT : LECTEUR AUDIO & NAVIGATION
+         ===================================================================== -->
+    <script>
+        let currentTrackIndex = -1;
+        let synthInterval = null;
+        let audioCtx = null;
+        let simElapsed = [0, 0, 0, 0, 0, 0, 0];
+        const fallbackDurations = [165, 192, 178, 185, 185, 185, 185];
 
-          <div class=content__group data-index=11>
-            <div class=content__title>The Living Ridge</div>
-            <div class=content__description>
-              The horizon remains one of the oldest teachers. Across countless Nations, stories, navigation, and ceremony begin not inside buildings but in relationship with the land itself.
-            </div>
-          </div>
+        function formatTime(sec) {
+            if (isNaN(sec) || !isFinite(sec)) return "00:00";
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
 
-          <div class=content__group data-index=12>
-            <div class=content__title>Future Ceremony</div>
-            <div class=content__description>
-              For generations, boarding schools attempted to erase Indigenous identity by replacing language, clothing, and tradition. Today's designers answer not with nostalgia, but with confident reinvention.
-            </div>
-          </div>
+        let toastTimeout;
+        const numberOfTracks = 7;
 
-          <div class=content__group data-index=13>
-            <div class=content__title>Holding the West</div>
-            <div class=content__description>
-              Monochrome becomes an act of restraint. Contemporary Native fashion often values material, silhouette, and story over spectacle, allowing craftsmanship to speak before symbolism.
-            </div>
-          </div>
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.textContent = message;
+            
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+                toast.classList.remove('opacity-100');
+            }, 3500);
+        }
 
-          <div class=content__group data-index=14>
-            <div class=content__title>The Quiet Treaty</div>
-            <div class=content__description>
-              History remembers broken treaties; communities remember those who endured them. This portrait looks forward without forgetting the promises that continue to shape Indigenous life today.
-            </div>
-          </div>
+        function updateTrackUI(index, isPlaying) {
+            const btn = document.getElementById(`play-btn-${index}`);
+            const wave = document.getElementById(`wave-${index}`);
+            const status = document.getElementById(`status-${index}`);
 
-          <div class=content__group data-index=15>
-            <div class=content__title>Sky Without Borders</div>
-            <div class=content__description>
-              The sky has never recognized the borders drawn across maps. For many Indigenous worldviews, belonging begins with relationship—to place, to people, and to all living things.
-            </div>
-          </div>
+            if (isPlaying) {
+                btn.innerHTML = '<i class="fa-solid fa-pause text-xs"></i>';
+                btn.classList.add('bg-champagne', 'text-black');
+                btn.classList.remove('text-champagne');
+                if (wave) wave.classList.remove('wave-paused');
+                if (status) status.textContent = "Lecture en cours";
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-play text-xs ml-0.5"></i>';
+                btn.classList.remove('bg-champagne', 'text-black');
+                btn.classList.add('text-champagne');
+                if (wave) wave.classList.add('wave-paused');
+                if (status) status.textContent = "En pause";
+            }
+        }
 
-          <div class=content__group data-index=16>
-            <div class=content__title>Native Modern</div>
-            <div class=content__description>
-              Indigenous fashion is among the fastest-evolving voices in contemporary design, proving that tradition is not the opposite of modernity. It is the foundation from which modernity grows.
-            </div>
-          </div>
+        function stopAllTracks() {
+            for (let i = 0; i < numberOfTracks; i++) {
+                const audio = document.getElementById(`audio-${i}`);
+                if (audio && !audio.paused) {
+                    audio.pause();
+                }
+                updateTrackUI(i, false);
+            }
+            if (synthInterval) {
+                clearInterval(synthInterval);
+                synthInterval = null;
+            }
+        }
 
-          <div class=content__group data-index=17>
-            <div class=content__title>Stone Kinship</div>
-            <div class=content__description>
-              Stone remembers what people often forget. Across many Indigenous traditions, the landscape is not scenery but a relative, carrying stories older than any written archive.
-            </div>
-          </div>
+        function playAtmosphericFallback(trackIdx, step) {
+            try {
+                if (!audioCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    audioCtx = new AudioContext();
+                }
+                if (audioCtx.state === 'suspended') audioCtx.resume();
 
-          <div class=content__group data-index=18>
-            <div class=content__title>Winter Holds</div>
-            <div class=content__description>
-              Survival has always been a form of beauty. Winter demanded ingenuity, patience, and deep communal knowledge—qualities still reflected in contemporary Indigenous design.
-            </div>
-          </div>
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
 
-          <div class=content__group data-index=19>
-            <div class=content__title>The Seventh Path</div>
-            <div class=content__description>
-              Many Indigenous teachings ask each generation to consider those yet to come. Fashion, too, becomes an inheritance when made with responsibility rather than excess.
-            </div>
-          </div>
+                const chords = [
+                    [146.83, 174.61, 220.00, 261.63], // Dm7
+                    [185.00, 220.00, 277.18, 329.63], // F#m7
+                    [130.81, 155.56, 196.00, 233.08], // Cm7
+                    [110.00, 130.81, 164.81, 196.00]  // Am7
+                ];
 
-          <div class=content__group data-index=20>
-            <div class=content__title>Listening Ground</div>
-            <div class=content__description>
-              To walk the land is also to listen. Traditional ecological knowledge has shaped sustainable relationships with forests, rivers, and plains for countless generations.
-            </div>
-          </div>
+                if (step % 4 === 0) {
+                    const chord = chords[trackIdx % chords.length] || chords[0];
+                    const note = chord[(step / 4) % chord.length];
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(note, now);
+                    gain.gain.setValueAtTime(0.001, now);
+                    gain.gain.linearRampToValueAtTime(0.05, now + 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.1);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 1.15);
+                }
+            } catch (e) {}
+        }
 
-          <div class=content__group data-index=21>
-            <div class=content__title>Made of Distance</div>
-            <div class=content__description>
-              Forced removals separated many Nations from their ancestral territories, yet identity endured. Home has always been carried in language, family, ceremony, and memory as much as geography.
-            </div>
-          </div>
+        function startFallbackPlayback(index) {
+            currentTrackIndex = index;
+            updateTrackUI(index, true);
+            document.getElementById(`status-${index}`).textContent = `Esquisse sonore (placez ./beat-0${index + 1}.mp3)`;
+            showToast(`Fichier local ./beat-0${index + 1}.mp3 absent : lecture d'une atmosphère de démonstration.`);
 
-          <div class=content__group data-index=22>
-            <div class=content__title>Names for Rain</div>
-            <div class=content__description>
-              Indigenous languages often describe weather with remarkable precision, reflecting generations spent observing subtle changes in the natural world. Every season has its own vocabulary.
-            </div>
-          </div>
+            let step = 0;
+            const total = fallbackDurations[index];
 
-          <div class=content__group data-index=23>
-            <div class=content__title>Returning North</div>
-            <div class=content__description>
-              Across North America, a new generation of Indigenous artists and designers is reclaiming narrative through fashion, proving that culture is strongest when it continues to evolve instead of standing still.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </main>
-  <script type=module src=Portfolio-Music-Part.5e5811e0.js></script>
-  <script src=https://tympanus.net/codrops/adpacks/cda_sponsor.js></script>
+            synthInterval = setInterval(() => {
+                simElapsed[index] += 0.25;
+                if (simElapsed[index] >= total) {
+                    simElapsed[index] = 0;
+                    stopAllTracks();
+                    currentTrackIndex = -1;
+                    return;
+                }
 
+                playAtmosphericFallback(index, step);
+                step++;
 
+                const pct = (simElapsed[index] / total) * 100;
+                document.getElementById(`progress-${index}`).style.width = `${pct}%`;
+                document.getElementById(`time-${index}`).textContent = `${formatTime(simElapsed[index])} / ${formatTime(total)}`;
+            }, 250);
+        }
+
+        function togglePlay(index) {
+            const audio = document.getElementById(`audio-${index}`);
+
+            if (currentTrackIndex === index) {
+                stopAllTracks();
+                currentTrackIndex = -1;
+                return;
+            }
+
+            stopAllTracks();
+            currentTrackIndex = index;
+
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    updateTrackUI(index, true);
+                }).catch(() => {
+                    startFallbackPlayback(index);
+                });
+            }
+        }
+
+        function seekTrack(event, index) {
+            const bar = event.currentTarget;
+            const rect = bar.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+
+            const audio = document.getElementById(`audio-${index}`);
+            if (audio && audio.duration && isFinite(audio.duration)) {
+                audio.currentTime = ratio * audio.duration;
+                document.getElementById(`progress-${index}`).style.width = `${ratio * 100}%`;
+            } else {
+                simElapsed[index] = ratio * fallbackDurations[index];
+                document.getElementById(`progress-${index}`).style.width = `${ratio * 100}%`;
+                document.getElementById(`time-${index}`).textContent = `${formatTime(simElapsed[index])} / ${formatTime(fallbackDurations[index])}`;
+            }
+        }
+
+        for (let i = 0; i < numberOfTracks; i++) {
+            const audio = document.getElementById(`audio-${i}`);
+            
+            audio.addEventListener('loadedmetadata', () => {
+                document.getElementById(`time-${i}`).textContent = `00:00 / ${formatTime(audio.duration)}`;
+            });
+
+            audio.addEventListener('timeupdate', () => {
+                if (audio.duration) {
+                    const pct = (audio.currentTime / audio.duration) * 100;
+                    document.getElementById(`progress-${i}`).style.width = `${pct}%`;
+                    document.getElementById(`time-${i}`).textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+                }
+            });
+
+            audio.addEventListener('ended', () => {
+                updateTrackUI(i, false);
+                document.getElementById(`progress-${i}`).style.width = '0%';
+                currentTrackIndex = -1;
+            });
+        }
+
+        function notifyLocalFile(event, filePath) {
+            fetch(filePath, { method: 'HEAD' })
+                .then(res => {
+                    if (!res.ok) {
+                        event.preventDefault();
+                        showToast(`Déposez "${filePath}" à la racine de votre hébergement pour l'écoute directe.`);
+                    }
+                })
+                .catch(() => {
+                    event.preventDefault();
+                    showToast(`Chemin configuré vers la racine du site : ${filePath}`);
+                });
+        }
+
+        // =================================================================
+        // NAVIGATION LATÉRALE
+        // =================================================================
+        const snapContainer = document.getElementById('snapContainer');
+        const sections = document.querySelectorAll('.snap-section');
+        const navLines = document.querySelectorAll('.nav-line');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+
+                    navLines.forEach(line => {
+                        if (line.getAttribute('data-nav') === id) {
+                            line.classList.remove('w-3', 'bg-white/20');
+                            line.classList.add('w-6', 'bg-champagne');
+                        } else {
+                            line.classList.add('w-3', 'bg-white/20');
+                            line.classList.remove('w-6', 'bg-champagne');
+                        }
+                    });
+                }
+            });
+        }, {
+            root: snapContainer,
+            threshold: 0.5
+        });
+
+        sections.forEach(sec => observer.observe(sec));
+    </script>
+</body>
+</html>
